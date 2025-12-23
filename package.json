@@ -17,11 +17,10 @@
     "production-grade"
   ],
   "author": "Production-Grade Implementer",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
-    "electron": "^27.0.0"
+    "electron": "^39.2.7"
   },
-  "devDependencies": {},
   "engines": {
     "node": ">=14.0.0"
   }
