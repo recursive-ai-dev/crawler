@@ -1,103 +1,68 @@
 # LPS Crawler Desktop
 
-A professional desktop GUI for the LPS Crawler, built with Electron and React.
+A desktop GUI for the LPS Crawler, built with Electron.
 
 ## Features
 
 ### 🕷️ Web Crawler
-- **Adaptive Link Discovery**: Intelligent crawling with tension-based phase adjustment
-- **Real-time Progress**: Live progress tracking with tension indicators
-- **Export Options**: Save results in JSON, CSV, and Markdown formats
-- **Robots.txt Compliance**: Respects website crawling policies
+- **Link Discovery**: Crawls websites using adaptive phase adjustment.
+- **Progress Tracking**: Real-time feedback on crawl status.
+- **Data Export**: Save results in JSON, CSV, and Markdown.
+- **Policies**: Respects Robots.txt rules.
 
 ### 🖼️ Image Extractor  
-- **Lazy-load Detection**: Automatically triggers infinite scroll and lazy-loaded content
-- **Multiple Formats**: Supports PNG, JPG, WebP, GIF, SVG, BMP
-- **Bulk Download**: Download all extracted images with organized file structure
-- **Preview Gallery**: Built-in image viewer with metadata display
+- **Auto-Scroll**: Trigger loading of lazy-loaded images.
+- **Format Support**: Handles PNG, JPG, WebP, GIF, SVG, BMP.
+- **Downloads**: Bulk download capability.
+- **Gallery**: Built-in image preview.
 
 ### 🎥 Video Extractor
-- **Streaming Protocols**: HLS (.m3u8) and DASH (.mpd) stream detection
-- **Player Support**: Video.js, HLS.js, Shaka Player, JW Player detection
-- **Network Interception**: Captures video sources from network requests
-- **Smart Filtering**: Handles blob URLs and temporary streams appropriately
+- **Stream Detection**: Identifies HLS (.m3u8) and DASH (.mpd) streams.
+- **Player Integration**: Detects Video.js, HLS.js, Shaka Player, JW Player.
+- **Network Scanning**: Captures media sources from network traffic.
 
-### 🖥️ Professional Desktop Interface
-- **Modern Design**: Clean, Material Design-based interface
-- **Cross-platform**: Works on Windows, macOS, and Linux
-- **Responsive**: Adapts to different screen sizes
-- **Keyboard Shortcuts**: Full keyboard navigation support
+### 🖥️ Desktop Interface
+- **Modern UI**: Clean Material Design interface.
+- **Cross-platform**: Compatible with Windows, macOS, and Linux.
 
 ## Installation
 
 ### Prerequisites
-- Node.js 18.0.0 or higher
-- npm or yarn
+- Node.js 14.0.0 or higher
+- npm
 
-### Development Setup
+### Setup
 ```bash
 # Install dependencies
 npm install
 
-# Start development mode
-npm run desktop:dev
-
-# Start production mode
-npm run desktop
-```
-
-### Building for Distribution
-
-#### Windows
-```bash
-npm run desktop:build:win
-```
-
-#### macOS
-```bash
-npm run desktop:build:mac
-```
-
-#### Linux
-```bash
-npm run desktop:build:linux
-```
-
-#### All Platforms
-```bash
-npm run desktop:build
+# Start desktop application
+npm start
 ```
 
 ## Usage
 
 ### 1. Web Crawler Tab
-1. Enter the target website URL
-2. Set maximum crawl phases (5-100)
-3. Click "Start Crawling"
-4. Monitor progress and view discovered links
-5. Export results when complete
+1. Enter URL.
+2. Set phases (5-100).
+3. "Start Crawling".
+4. Export results when done.
 
 ### 2. Image Extractor Tab
-1. Enter the target website URL
-2. Configure scroll settings:
-   - Max scrolls (5-100)
-   - Scroll delay (500-5000ms)
-3. Optionally enable "Download images"
-4. Click "Start Extraction"
-5. View extracted images in the gallery
+1. Enter URL.
+2. Configure scrolling.
+3. "Start Extraction".
+4. View/Download found images.
 
 ### 3. Video Extractor Tab
-1. Enter the target website URL
-2. Set observation window (1-15 seconds)
-3. Optionally enable "Download videos"
-4. Click "Start Extraction"
-5. View grouped video sources by type
+1. Enter URL.
+2. "Start Extraction".
+3. View detected video sources.
 
 ### 4. Settings Tab
-- Configure download directories
-- Set rate limits and concurrency
-- Toggle headless mode and robots.txt compliance
-- Customize notification preferences
+- Set download folder.
+- Configure concurrency and timeouts.
+- Set User Agent.
 
 ## Keyboard Shortcuts
 
@@ -107,112 +72,19 @@ npm run desktop:build
 | Ctrl+E | Export results |
 | Ctrl+, | Open settings |
 | Ctrl+Q | Quit application |
-| F5 | Reload current view |
-| Ctrl+Shift+I | Toggle developer tools |
+| F5 | Reload |
+| Ctrl+Shift+I | Dev tools |
 
-## Architecture
+## Project Structure
 
 ```
 desktop/
 ├── main.js                 # Electron main process
-├── preload.js             # Secure IPC bridge
-├── public/
-│   └── index.html         # HTML entry point
-├── src/
-│   ├── index.js           # React entry point
-│   ├── App.js             # Main application component
-│   ├── components/        # React components
-│   │   ├── CrawlerPanel.js
-│   │   ├── ImageExtractorPanel.js
-│   │   ├── VideoExtractorPanel.js
-│   │   └── SettingsPanel.js
-│   ├── utils/             # Utility functions
-│   └── styles/            # CSS styles
-└── assets/                # App icons and resources
+├── preload.js             # IPC bridge
+└── assets/                # Resources
 ```
-
-## Configuration
-
-Settings are automatically saved to local storage and persist between sessions. Key settings include:
-
-- **Download Directory**: Where media files are saved
-- **Max Concurrent Downloads**: Parallel download limit
-- **Rate Limit**: Requests per second limit
-- **Headless Mode**: Browser visibility setting
-- **Robots.txt Compliance**: Respect crawling policies
-
-## Security Features
-
-- **Context Isolation**: Renderer process is isolated from Node.js
-- **Secure IPC**: Whitelisted channels for main-renderer communication
-- **No Node Integration**: Renderer cannot access Node.js APIs directly
-- **Content Security Policy**: Prevents injection attacks
-
-## Development
-
-### Adding New Features
-1. Create React components in `src/components/`
-2. Add IPC handlers in `main.js` if needed
-3. Update preload script to expose new APIs
-4. Add corresponding styles in `src/styles/`
-
-### Testing
-```bash
-# Run tests for the crawler backend
-npm test
-
-# Test desktop app manually
-npm run desktop:dev
-```
-
-### Debugging
-- Use Chrome DevTools (F12) in development mode
-- Check Electron main process logs in terminal
-- Enable verbose logging in settings
-
-## Troubleshooting
-
-### Common Issues
-
-1. **App won't start**
-   - Check Node.js version (18.0.0+)
-   - Verify all dependencies are installed
-   - Check for port conflicts
-
-2. **Browser not launching**
-   - Ensure Puppeteer Chrome is installed
-   - Check headless mode settings
-   - Verify system permissions
-
-3. **Downloads failing**
-   - Check download directory permissions
-   - Verify available disk space
-   - Check network connectivity
-
-4. **Performance issues**
-   - Reduce concurrent download limit
-   - Lower rate limit settings
-   - Clear download directory
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Implement your changes
-4. Test thoroughly
-5. Submit a pull request
+*(The UI is served from the root `index.html` via a local server)*
 
 ## License
 
-MIT License - see LICENSE file for details
-
-## Support
-
-For issues and questions:
-- Check the troubleshooting section
-- Review GitHub issues
-- Create a new issue with detailed information
-
----
-
-**LPS Crawler Desktop** - Professional web scraping made simple! 🕷️
+Apache License 2.0 - see the [LICENSE](../LICENSE) file for details.
