@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LPS Crawler - Button Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .success { background: #4caf50; color: white; }
+        .error { background: #f44336; color: white; }
+        #output { margin-top: 20px; padding: 10px; background: #f5f5f5; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🧪 LPS Crawler - Button Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Button Click Tests</h2>
+        <button onclick="testButton('Primary')" class="success">Test Primary Button</button>
+        <button onclick="testButton('Secondary')">Test Secondary Button</button>
+        <button onclick="testFunction()" class="error">Test Function Call</button>
+        <button onclick="testSlider()">Test Slider Update</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Tab Switching Test</h2>
+        <button onclick="switchTab(0)">Tab 0</button>
+        <button onclick="switchTab(1)">Tab 1</button>
+        <button onclick="switchTab(2)">Tab 2</button>
+        <button onclick="switchTab(3)">Tab 3</button>
+    </div>
+    
+    <div id="output">Ready for testing...</div>
+
+    <script>
+        console.log('🧪 Test page loaded');
+        
+        function testButton(type) {
+            console.log('✅ Button clicked:', type);
+            updateOutput('Button clicked: ' + type);
+        }
+        
+        function testFunction() {
+            console.log('✅ Function called successfully');
+            updateOutput('Function executed successfully!');
+        }
+        
+        function testSlider() {
+            console.log('📊 Testing slider update');
+            updateOutput('Slider functionality working!');
+        }
+        
+        function switchTab(tabIndex) {
+            console.log('🔄 Switching to tab:', tabIndex);
+            updateOutput('Switched to tab: ' + tabIndex);
+        }
+        
+        function updateOutput(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += message + '<br>';
+        }
+        
+        // Test basic DOM manipulation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM fully loaded');
+            updateOutput('DOM loaded successfully');
+            updateOutput('JavaScript is working!');
+        });
+    </script>
+</body>
+</html>

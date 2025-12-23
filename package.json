@@ -1,0 +1,28 @@
+{
+  "name": "lps-crawler-desktop",
+  "version": "1.0.0",
+  "description": "Production-grade web scraping tool with advanced crawling algorithms and desktop GUI",
+  "main": "desktop/main.js",
+  "scripts": {
+    "start": "node start-desktop.js",
+    "serve": "node serve-gui.js",
+    "dev": "NODE_ENV=development node start-desktop.js",
+    "test": "node test-implementation.js"
+  },
+  "keywords": [
+    "web-scraping",
+    "crawler",
+    "desktop-app",
+    "electron",
+    "production-grade"
+  ],
+  "author": "Production-Grade Implementer",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^27.0.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

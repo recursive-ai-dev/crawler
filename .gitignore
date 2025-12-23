@@ -1,0 +1,70 @@
+# Defaults
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Environment & Config
+.env
+.env.local
+.env.*
+config.json
+
+# Logs & Diagnostics
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+crash-reports/
+
+# Dependencies
+# keep package-lock.json / yarn.lock for deterministic builds
+
+# Build & Dist
+dist/
+build/
+out/
+release/
+.cache/
+
+# Crawler Output & State
+output/
+example-output/
+downloads/
+checkpoint.json
+*.jsonl
+report.md
+raw.txt
+
+# Testing & Reports
+coverage/
+.nyc_output/
+test-report.json
+comprehensive-test-report.json
+verify-all.js
+
+# Temporary Test Files (Generated during validation)
+WORKING_GUI.html
+launch-real-desktop.js
+desktop/REAL_DESKTOP_APP.js
+cli-test/
+
+# IDE & Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+.project
+.classpath
+.settings/
+
+# Puppeteer
+.local-chromium/
+screenshots/
+videos/
+
+# Electron-Builder
+dist/
+dist-electron/
+release/

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LPS Crawler Pro - Web Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .app-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1976d2, #dc004e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 300;
+        }
+
+        .tabs-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: #1976d2;
+            background: rgba(25, 118, 210, 0.1);
+        }
+
+        .tab.active {
+            color: #1976d2;
+            border-bottom-color: #1976d2;
+            background: rgba(25, 118, 210, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .control-panel {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .slider-container {
+            margin-bottom: 16px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1976d2;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(25, 118, 210, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1976d2;
+            border: 2px solid #1976d2;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(25, 118, 210, 0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            transition: width 0.3s ease;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1976d2;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .image-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .image-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1976d2;
+            font-weight: 500;
+        }
+
+        .image-info {
+            padding: 12px;
+        }
+
+        .video-list {
+            margin-top: 16px;
+        }
+
+        .video-item {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        .chip-primary { background: #e3f2fd; color: #1976d2; }
+        .chip-secondary { background: #fce4ec; color: #c2185b; }
+        .chip-success { background: #e8f5e8; color: #388e3c; }
+        .chip-warning { background: #fff3e0; color: #f57c00; }
+
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success { border-left: 4px solid #4caf50; }
+        .notification.warning { border-left: 4px solid #ff9800; }
+        .notification.error { border-left: 4px solid #f44336; }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 12px;
+            }
+            
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <h1 class="app-title">LPS Crawler Pro</h1>
+            <p class="app-subtitle">Professional Web Scraping Tool with Desktop GUI</p>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="tabs-container">
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(0)">
+                    <span class="material-icons">travel_explore</span>
+                    Web Crawler
+                </button>
+                <button class="tab" onclick="switchTab(1)">
+                    <span class="material-icons">photo_camera</span>
+                    Image Extractor
+                </button>
+                <button class="tab" onclick="switchTab(2)">
+                    <span class="material-icons">video_library</span>
+                    Video Extractor
+                </button>
+                <button class="tab" onclick="switchTab(3)">
+                    <span class="material-icons">settings</span>
+                    Settings
+                </button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-content active" id="tab-0">
+                <div class="control-panel">
+                    <h3 class="section-title">Web Crawler Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Target URL</label>
+                        <input type="url" class="form-input" id="crawl-url" value="https://example.com" placeholder="https://example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Phases: <span id="crawl-phases-value">20</span></label>
+                        <input type="range" class="slider" id="crawl-phases" min="5" max="100" value="20" oninput="updateSlider('crawl-phases')">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="startCrawling()">
+                            <span class="material-icons">play_arrow</span>
+                            Start Crawling
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportCrawlResults()">
+                            <span class="material-icons">download</span>
+                            Export Results
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="section-title">Crawling Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="crawl-progress" style="width: 0%"></div>
+                    </div>
+                    <p id="crawl-status">Ready to start crawling</p>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="section-title">Crawl Results</h3>
+                    <div class="results-grid" id="crawl-results">
+                        <div class="result-card">
+                            <div class="result-value" id="crawl-phases-completed">0</div>
+                            <div class="result-label">Phases Completed</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-value" id="crawl-links-found">0</div>
+                            <div class="result-label">Links Found</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-value" id="crawl-duration">0.0s</div>
+                            <div class="result-label">Duration</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-value" id="crawl-tension">0.00</div>
+                            <div class="result-label">Avg Tension</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-1">
+                <div class="control-panel">
+                    <h3 class="section-title">Image Extractor Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Target URL</label>
+                        <input type="url" class="form-input" id="image-url" value="https://unsplash.com" placeholder="https://unsplash.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Scrolls: <span id="image-scrolls-value">30</span></label>
+                        <input type="range" class="slider" id="image-scrolls" min="5" max="100" value="30" oninput="updateSlider('image-scrolls')">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Scroll Delay: <span id="image-delay-value">1000</span>ms</label>
+                        <input type="range" class="slider" id="image-delay" min="500" max="5000" value="1000" step="100" oninput="updateSlider('image-delay')">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="image-download" onchange="toggleDownloadOptions('image')">
+                            Download images to local files
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="image-download-options" style="display: none;">
+                        <label class="form-label">Download Directory</label>
+                        <input type="text" class="form-input" id="image-download-dir" value="./downloads/images" placeholder="./downloads/images">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="startImageExtraction()">
+                            <span class="material-icons">photo_camera</span>
+                            Start Extraction
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="section-title">Extraction Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="image-progress" style="width: 0%"></div>
+                    </div>
+                    <p id="image-status">Ready to start extraction</p>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="section-title">Extracted Images</h3>
+                    <div class="results-grid" id="image-results">
+                        <div class="result-card">
+                            <div class="result-value" id="image-count">0</div>
+                            <div class="result-label">Images Found</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-value" id="image-downloaded">0</div>
+                            <div class="result-label">Downloaded</div>
+                        </div>
+                    </div>
+                    <div class="image-grid" id="image-gallery"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-2">
+                <div class="control-panel">
+                    <h3 class="section-title">Video Extractor Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Target URL</label>
+                        <input type="url" class="form-input" id="video-url" value="https://www.youtube.com/watch?v=dQw4w9WgXcQ" placeholder="https://video-site.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Observation Window: <span id="video-window-value">5000</span>ms</label>
+                        <input type="range" class="slider" id="video-window" min="1000" max="15000" value="5000" step="1000" oninput="updateSlider('video-window')">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="video-download" onchange="toggleDownloadOptions('video')">
+                            Download videos to local files
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="video-download-options" style="display: none;">
+                        <label class="form-label">Download Directory</label>
+                        <input type="text" class="form-input" id="video-download-dir" value="./downloads/videos" placeholder="./downloads/videos">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="startVideoExtraction()">
+                            <span class="material-icons">video_library</span>
+                            Start Extraction
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="section-title">Extraction Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="video-progress" style="width: 0%"></div>
+                    </div>
+                    <p id="video-status">Ready to start extraction</p>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="section-title">Extracted Video Sources</h3>
+                    <div class="results-grid" id="video-results">
+                        <div class="result-card">
+                            <div class="result-value" id="video-total">0</div>
+                            <div class="result-label">Videos Found</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-value" id="video-downloaded">0</div>
+                            <div class="result-label">Downloaded</div>
+                        </div>
+                    </div>
+                    <div class="video-list" id="video-list"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-3">
+                <div class="control-panel">
+                    <h3 class="section-title">Application Settings</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Download Directory</label>
+                        <input type="text" class="form-input" id="settings-download-dir" value="./downloads" placeholder="./downloads">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Concurrent Downloads: <span id="settings-concurrent-value">5</span></label>
+                        <input type="range" class="slider" id="settings-concurrent" min="1" max="20" value="5" oninput="updateSlider('settings-concurrent')">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rate Limit (requests/second): <span id="settings-rate-value">5</span></label>
+                        <input type="range" class="slider" id="settings-rate" min="1" max="20" value="5" oninput="updateSlider('settings-rate')">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="saveSettings()">
+                            <span class="material-icons">save</span>
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification" id="notification"></div>
+
+    <script src="app-fixed.js"></script>
+</body>
+</html>

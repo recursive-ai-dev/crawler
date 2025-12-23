@@ -1,0 +1,16 @@
+Placeholder icon file
+Replace with actual icon in appropriate format:
+- icon.png (512x512) for general use
+- icon.ico (multi-resolution) for Windows  
+- icon.icns (multi-resolution) for macOS
+
+The SVG icon (icon.svg) can be converted to these formats using:
+- ImageMagick: convert icon.svg -resize 512x512 icon.png
+- Online converters for ICO and ICNS formats
+- Professional icon creation tools
+
+Current SVG icon shows:
+- Blue gradient background
+- Spider web pattern (representing web crawling)
+- "LPS" text in white
+- "Crawler Pro" subtitle

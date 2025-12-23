@@ -1,0 +1,63 @@
+appId: com.lpscrawler.app
+productName: LPS Crawler Pro
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - main.js
+  - preload.js
+  - public/**/*
+  - src/**/*
+  - assets/**/*
+  - node_modules/**/*
+  - package.json
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: assets/icon.icns
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, ia32]
+  icon: assets/icon.ico
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+  icon: assets/icon.png
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: LPS Crawler Pro
+  uninstallDisplayName: LPS Crawler Pro
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
+
+dmg:
+  title: LPS Crawler Pro
+  icon: assets/icon.icns
+  iconSize: 80
+  contents:
+    - x: 410
+      y: 150
+      type: link
+      path: /Applications
+    - x: 130
+      y: 150
+      type: file
+
+publish:
+  provider: github
+  owner: yourusername
+  repo: lps-crawler
