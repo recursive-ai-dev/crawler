@@ -457,11 +457,9 @@ console.log('\n=====================================');
 console.log(`\n📊 Test Results: ${passed}/${total} passed`);
 if (failed > 0) {
     console.log(`   ❌ ${failed} tests failed\n`);
-    // Don't exit in Jest environment
+    // Don't exit in Jest environment - Jest will handle failures
     if (typeof describe === 'undefined') {
         process.exit(1);
-    } else {
-        throw new Error(`${failed} tests failed`);
     }
 } else {
     console.log('   ✅ All tests passed!\n');
@@ -471,7 +469,7 @@ if (failed > 0) {
     }
 }
 
-// Add a Jest test to make Jest happy
+// Jest test - will automatically fail if any assertions failed
 test('All mathematical utilities tests pass', () => {
     expect(failed).toBe(0);
     expect(passed).toBe(total);
