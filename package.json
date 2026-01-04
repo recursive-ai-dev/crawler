@@ -8,7 +8,7 @@
     "serve": "node serve-gui.js",
     "dev": "NODE_ENV=development node start-desktop.js",
     "test": "node test-implementation.js",
-    "test:unit": "jest tests/*.test.js --testPathIgnorePatterns=integration",
+    "test:unit": "jest --testPathIgnorePatterns=comprehensive-integration",
     "test:integration": "jest tests/comprehensive-integration.test.js --runInBand --detectOpenHandles",
     "test:all": "jest --runInBand --detectOpenHandles"
   },
