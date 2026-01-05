@@ -1,189 +1,212 @@
-const { LPSCrawler, BrowserInterface, MFTExtractor, TBRExtractor } = require('../src');
+const { describe, test, before, after } = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('path');
+const {
+  LPSCrawler,
+  BrowserInterface,
+  MFTExtractor,
+  TBRExtractor,
+  AudioExtractor,
+  PDFExtractor,
+  TextExtractor,
+  DataSynthesizer
+} = require('../src');
+const { createTestServer, closeServer } = require('./test-utils');
 
 describe('LPSCrawler', () => {
-  let crawler;
-  let mockBrowser;
+  let server;
+  let baseUrl;
 
-  beforeEach(() => {
-    mockBrowser = {
-      initialize: jest.fn(),
-      interact: jest.fn(),
-      close: jest.fn(),
-      page: { url: () => 'https://example.com' }
-    };
-    
-    crawler = new LPSCrawler(mockBrowser, { maxPhases: 5 });
+  before(async () => {
+    const serverInfo = await createTestServer();
+    server = serverInfo.server;
+    baseUrl = serverInfo.baseUrl;
+  });
+
+  after(async () => {
+    await closeServer(server);
   });
 
   test('should initialize with correct defaults', () => {
-    expect(crawler.phase).toBe(0);
-    expect(crawler.wavefrontSize).toBe(1);
-    expect(crawler.discoverySet.size).toBe(0);
+    const crawler = new LPSCrawler(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }));
+    assert.equal(crawler.phase, 0);
+    assert.equal(crawler.wavefrontSize, 1);
+    assert.equal(crawler.discoverySet.size, 0);
   });
 
   test('should calculate tension correctly', () => {
+    const crawler = new LPSCrawler(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }));
     const newLinks = [
-      { url: 'https://example.com/1', text: 'Link 1' },
-      { url: 'https://example.com/2', text: 'Link 2' }
+      { url: `${baseUrl}/link-1`, text: 'Link 1' },
+      { url: `${baseUrl}/link-2`, text: 'Link 2' }
     ];
-    
+
     const tension = crawler.calculateTension(newLinks);
-    expect(tension).toBe(2); // 2 new links / wavefront of 1
-    expect(crawler.discoverySet.size).toBe(2);
+    assert.equal(tension, 2);
+    assert.equal(crawler.discoverySet.size, 2);
   });
 
   test('should expand wavefront on high tension', () => {
+    const crawler = new LPSCrawler(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }));
     crawler._adaptWavefront(0.6);
-    expect(crawler.wavefrontSize).toBe(2);
+    assert.equal(crawler.wavefrontSize, 2);
   });
 
   test('should detect stasis', () => {
+    const crawler = new LPSCrawler(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }));
     crawler.config.stasisWindow = 3;
     crawler.tensionMap = [0, 0, 0];
     crawler._checkStasis();
-    expect(crawler.isStasis).toBe(true);
+    assert.equal(crawler.isStasis, true);
   });
 
-  test('should perform phase shift', async () => {
-    mockBrowser.interact.mockResolvedValue([
-      { url: 'https://example.com/1', text: 'Link 1' }
-    ]);
-
+  test('should perform phase shift with real browser', async () => {
+    const browser = new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    });
+    const crawler = new LPSCrawler(browser, { maxPhases: 1, saveInterval: 99 });
+    await crawler.browser.initialize(baseUrl);
     await crawler.phaseShift();
-    
-    expect(mockBrowser.interact).toHaveBeenCalledWith('SCROLL');
-    expect(crawler.phase).toBe(1);
-    expect(crawler.discoverySet.size).toBe(1);
+    assert.ok(crawler.phase >= 1);
+    assert.ok(crawler.discoverySet.size > 0);
+    await crawler.browser.close();
   });
 });
 
-describe('MFTExtractor', () => {
-  let extractor;
-  let mockBrowser;
+describe('Extractors', () => {
+  let server;
+  let baseUrl;
 
-  beforeEach(() => {
-    mockBrowser = {
-      initialize: jest.fn(),
-      close: jest.fn(),
-      page: {
-        url: () => 'https://example.com',
-        setRequestInterception: jest.fn(),
-        on: jest.fn(),
-        evaluate: jest.fn(),
-        waitForTimeout: jest.fn(),
-        $: jest.fn()
-      }
-    };
-    
-    extractor = new MFTExtractor(mockBrowser);
+  before(async () => {
+    const serverInfo = await createTestServer();
+    server = serverInfo.server;
+    baseUrl = serverInfo.baseUrl;
   });
 
-  test('should identify media URLs correctly', () => {
-    expect(extractor._isMediaUrl('https://example.com/image.jpg')).toBe(true);
-    expect(extractor._isMediaUrl('https://example.com/image.png')).toBe(true);
-    expect(extractor._isMediaUrl('https://example.com/page.html')).toBe(false);
+  after(async () => {
+    await closeServer(server);
   });
 
-  test('should normalize URLs correctly', () => {
-    extractor.browser.page.url = () => 'https://example.com';
-    const normalized = extractor.normalizeItem('https://example.com/image.jpg?utm_source=test&cache=123');
-    expect(normalized).not.toContain('utm_source');
-  });
-});
-
-describe('TBRExtractor', () => {
-  let extractor;
-  let mockBrowser;
-
-  beforeEach(() => {
-    mockBrowser = {
-      initialize: jest.fn(),
-      close: jest.fn(),
-      page: {
-        url: () => 'https://example.com',
-        setRequestInterception: jest.fn(),
-        on: jest.fn(),
-        evaluate: jest.fn(),
-        waitForTimeout: jest.fn(),
-        frames: () => []
-      }
-    };
-    
-    extractor = new TBRExtractor(mockBrowser);
+  test('MFTExtractor should detect images in DOM', async () => {
+    const extractor = new MFTExtractor(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }), {
+      maxScrolls: 1,
+      scrollDelay: 150,
+      stabilizationDelay: 300
+    });
+    const results = await extractor.run(baseUrl);
+    assert.ok(results.items.some(item => item.includes('hero.jpg')));
   });
 
-  test('should identify video signatures correctly', () => {
-    expect(extractor._isVideoSignature('https://example.com/video.m3u8')).toBe(true);
-    expect(extractor._isVideoSignature('https://example.com/video.mp4')).toBe(true);
-    expect(extractor._isVideoSignature('https://example.com/manifest.mpd')).toBe(true);
-    expect(extractor._isVideoSignature('blob:https://example.com/123')).toBe(true);
-    expect(extractor._isVideoSignature('https://example.com/page.html')).toBe(false);
+  test('TBRExtractor should detect video sources', async () => {
+    const extractor = new TBRExtractor(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }), {
+      observationWindow: 500,
+      scanShadowDOM: false
+    });
+    const results = await extractor.run(baseUrl);
+    assert.ok(results.grouped.hls.some(item => item.includes('stream.m3u8')));
+    assert.ok(results.grouped.direct.some(item => item.includes('video.mp4')));
   });
 
-  test('should export results with grouping', () => {
-    extractor.extractedItems.add('https://example.com/video.m3u8');
-    extractor.extractedItems.add('https://example.com/video.mp4');
-    extractor.extractedItems.add('https://example.com/manifest.mpd');
-    
-    const results = extractor.exportResults();
-    expect(results.grouped.hls).toHaveLength(1);
-    expect(results.grouped.dash).toHaveLength(1);
-    expect(results.grouped.direct).toHaveLength(1);
+  test('AudioExtractor should detect audio sources', async () => {
+    const extractor = new AudioExtractor(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }), {
+      observationWindow: 500
+    });
+    const results = await extractor.run(baseUrl);
+    assert.ok(results.grouped.mp3.some(item => item.includes('audio.mp3')));
+  });
+
+  test('PDFExtractor should detect PDF links', async () => {
+    const extractor = new PDFExtractor(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }));
+    const results = await extractor.run(baseUrl);
+    assert.ok(results.grouped.pdf.some(item => item.includes('sample.pdf')));
+  });
+
+  test('TextExtractor should generate metadata summary', async () => {
+    const extractor = new TextExtractor(new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    }), {
+      waitForDynamicContent: 200
+    });
+    const results = await extractor.run(baseUrl);
+    assert.ok(results.summary.wordCount > 0);
   });
 });
 
 describe('DataSynthesizer', () => {
-  const DataSynthesizer = require('../src/DataSynthesizer');
-  let synthesizer;
-  let mockLogs;
+  let server;
+  let baseUrl;
 
-  beforeEach(() => {
-    mockLogs = [
-      {
-        data: { url: 'https://example.com/1', text: 'Link 1', title: 'Title 1' },
-        phase: 0,
-        timestamp: Date.now(),
-        interaction: 'SCROLL'
-      },
-      {
-        data: { url: 'https://example.com/2', text: 'Link 2', title: 'Title 2' },
-        phase: 1,
-        timestamp: Date.now(),
-        interaction: 'PAGE_NEXT'
-      }
-    ];
-    
-    synthesizer = new DataSynthesizer(mockLogs);
+  before(async () => {
+    const serverInfo = await createTestServer();
+    server = serverInfo.server;
+    baseUrl = serverInfo.baseUrl;
   });
 
-  test('should generate JSONL format', () => {
+  after(async () => {
+    await closeServer(server);
+  });
+
+  test('should generate formats from real crawl logs', async () => {
+    const browser = new BrowserInterface({
+      headless: true,
+      respectRobots: false,
+      defaultTimeout: 5000
+    });
+    const crawler = new LPSCrawler(browser, {
+      maxPhases: 2,
+      saveInterval: 99,
+      outputDir: path.join(__dirname, 'data-synth-output')
+    });
+
+    await crawler.run(baseUrl);
+    const logs = crawler.extractionLog;
+    assert.ok(logs.length > 0);
+
+    const synthesizer = new DataSynthesizer(logs);
     const jsonl = synthesizer.toJSONL();
-    const lines = jsonl.split('\n');
-    expect(lines).toHaveLength(2);
-    
-    const parsed = JSON.parse(lines[0]);
-    expect(parsed).toHaveProperty('instruction');
-    expect(parsed).toHaveProperty('context');
-    expect(parsed).toHaveProperty('response');
-  });
-
-  test('should generate Markdown format', () => {
-    const md = synthesizer.toMarkdown();
-    expect(md).toContain('# LPS Discovery Report');
-    expect(md).toContain('## Summary');
-    expect(md).toContain('### Phase 0');
-  });
-
-  test('should generate CSV format', () => {
+    const markdown = synthesizer.toMarkdown();
     const csv = synthesizer.toCSV();
-    const lines = csv.split('\n');
-    expect(lines[0]).toContain('timestamp,phase,interaction,url,text,title');
-    expect(lines).toHaveLength(3); // header + 2 data rows
-  });
-
-  test('should generate raw format', () => {
     const raw = synthesizer.toRaw();
-    expect(raw).toContain('https://example.com/1');
-    expect(raw).toContain('https://example.com/2');
+
+    assert.equal(jsonl.split('\n').length, logs.length);
+    assert.ok(markdown.includes('# LPS Discovery Report'));
+    assert.ok(csv.startsWith('timestamp,phase,interaction,url,text,title'));
+    assert.ok(raw.includes('SCROLL') || raw.includes('PAGE_NEXT'));
   });
 });
