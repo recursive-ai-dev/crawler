@@ -11,24 +11,49 @@
 const fs = require('fs').promises;
 const path = require('path');
 const http = require('http');
+const mathUtils = require('./src/utils/mathUtils');
+const {
+    BrowserInterface,
+    LPSCrawler,
+    TextExtractor,
+    MFTExtractor,
+    TBRExtractor,
+    AudioExtractor,
+    PDFExtractor,
+    DataSynthesizer
+} = require('./src');
+const { createTestServer, closeServer } = require('./tests/test-utils');
 
 class ImplementationTester {
     constructor() {
         this.testResults = [];
         this.startTime = Date.now();
+        this.testContext = {};
     }
 
     async runAllTests() {
         console.log('🔍 LPS Crawler Implementation Test Suite');
         console.log('==========================================');
         console.log('');
+        const { server, baseUrl } = await createTestServer();
+        this.testContext.server = server;
+        this.testContext.baseUrl = baseUrl;
 
-        await this.testFileStructure();
-        await this.testCodeQuality();
-        await this.testServerFunctionality();
-        await this.testDesktopAppStructure();
-        await this.testGUIImplementation();
-        
+        try {
+            await this.testFileStructure();
+            await this.testCodeQuality();
+            await this.testServerFunctionality();
+            await this.testMathUtils();
+            await this.testBrowserInterfaceIntegration();
+            await this.testCrawlerIntegration();
+            await this.testExtractorIntegration();
+            await this.testDataSynthesizerIntegration();
+            await this.testDesktopAppStructure();
+            await this.testGUIImplementation();
+        } finally {
+            await closeServer(this.testContext.server);
+        }
+
         this.generateTestReport();
     }
 
@@ -36,11 +61,11 @@ class ImplementationTester {
         console.log('📁 Testing File Structure...');
         
         const requiredFiles = [
-            'launch-real-desktop.js',
             'serve-gui.js',
-            'WORKING_GUI.html',
+            'index.html',
             'package.json',
-            'desktop/REAL_DESKTOP_APP.js',
+            'start-desktop.js',
+            'desktop/main.js',
             'desktop/preload.js'
         ];
 
@@ -70,10 +95,10 @@ class ImplementationTester {
         console.log('🔍 Testing Code Quality...');
         
         const filesToCheck = [
-            'launch-real-desktop.js',
+            'start-desktop.js',
             'serve-gui.js',
-            'desktop/REAL_DESKTOP_APP.js',
-            'WORKING_GUI.html'
+            'desktop/main.js',
+            'index.html'
         ];
 
         for (const file of filesToCheck) {
@@ -134,7 +159,7 @@ class ImplementationTester {
             
             // Test HTTP requests
             await this.testHTTPRequest('http://localhost:3002', 'Main page');
-            await this.testHTTPRequest('http://localhost:3002/WORKING_GUI.html', 'GUI file');
+            await this.testHTTPRequest('http://localhost:3002/index.html', 'GUI file');
             await this.testHTTPRequest('http://localhost:3002/api/health', 'Health endpoint');
             
             this.testResults.push({
@@ -155,6 +180,229 @@ class ImplementationTester {
         serverProcess.kill('SIGTERM');
         await this.delay(1000);
         
+        console.log('');
+    }
+
+    recordResult(test, passed, details) {
+        const status = passed ? 'PASS' : 'FAIL';
+        this.testResults.push({ test, status, details });
+        const icon = passed ? '✅' : '❌';
+        console.log(`   ${icon} ${test}`);
+    }
+
+    async testMathUtils() {
+        console.log('📐 Testing Mathematical Utilities...');
+        const range = Array.from({ length: 14 }, (_, idx) => idx - 1);
+
+        const clampResults = range.map(value => mathUtils.clamp(value, 0, 10));
+        const clampWithinBounds = clampResults.every(value => value >= 0 && value <= 10);
+        this.recordResult(
+            'clamp enforces bounds for -1..12',
+            clampWithinBounds,
+            `Clamp results: ${clampResults.join(', ')}`
+        );
+
+        const readingTimes = range.map(value => mathUtils.calculateReadingTime(value, 200));
+        const readingTimeValid = readingTimes.filter(value => value !== null).every(value => value >= 1);
+        this.recordResult(
+            'calculateReadingTime handles -1..12 range',
+            readingTimeValid,
+            `Reading time outputs: ${readingTimes.join(', ')}`
+        );
+
+        const rateLimitWaits = range.map(value => mathUtils.calculateRateLimitWait(1000, value * 100, 100));
+        const waitValid = rateLimitWaits.every(value => value >= 100);
+        this.recordResult(
+            'calculateRateLimitWait enforces minWait across -1..12',
+            waitValid,
+            `Waits: ${rateLimitWaits.join(', ')}`
+        );
+
+        const successRates = range.map(value => mathUtils.calculateSuccessRate(Math.max(0, value), 12));
+        const successRateValid = successRates.every(result => typeof result.rate === 'number' && typeof result.percentage === 'string');
+        this.recordResult(
+            'calculateSuccessRate outputs stable types for -1..12',
+            successRateValid,
+            `Rates: ${successRates.map(r => r.percentage).join(', ')}`
+        );
+
+        console.log('');
+    }
+
+    async testBrowserInterfaceIntegration() {
+        console.log('🧭 Testing BrowserInterface Integration...');
+        const browser = new BrowserInterface({
+            headless: true,
+            respectRobots: false,
+            defaultTimeout: 5000
+        });
+
+        try {
+            await browser.initialize(this.testContext.baseUrl);
+            const scrollLinks = await browser.interact('SCROLL');
+            const hasPage2 = scrollLinks.some(link => link.url.includes('/page2'));
+            this.recordResult(
+                'BrowserInterface scroll link extraction',
+                hasPage2,
+                `Scroll returned ${scrollLinks.length} links`
+            );
+
+            const nextLinks = await browser.interact('PAGE_NEXT');
+            const hasPage3 = nextLinks.some(link => link.url.includes('/page3'));
+            this.recordResult(
+                'BrowserInterface pagination link extraction',
+                hasPage3,
+                `Pagination returned ${nextLinks.length} links`
+            );
+        } catch (error) {
+            this.recordResult('BrowserInterface integration', false, error.message);
+        } finally {
+            await browser.close();
+        }
+
+        console.log('');
+    }
+
+    async testCrawlerIntegration() {
+        console.log('🕸️  Testing LPSCrawler Integration...');
+        const browser = new BrowserInterface({
+            headless: true,
+            respectRobots: false,
+            defaultTimeout: 5000
+        });
+        const outputDir = path.join(__dirname, 'test-output');
+        const crawler = new LPSCrawler(browser, {
+            maxPhases: 2,
+            saveInterval: 99,
+            outputDir
+        });
+
+        try {
+            const report = await crawler.run(this.testContext.baseUrl);
+            this.testContext.crawlerLog = crawler.extractionLog;
+
+            this.recordResult(
+                'LPSCrawler report links found',
+                report.linksFound > 0,
+                `Links found: ${report.linksFound}`
+            );
+            this.recordResult(
+                'LPSCrawler report phases executed',
+                report.phases >= 2,
+                `Phases: ${report.phases}`
+            );
+        } catch (error) {
+            this.recordResult('LPSCrawler integration', false, error.message);
+        }
+
+        console.log('');
+    }
+
+    async testExtractorIntegration() {
+        console.log('🧪 Testing Extractor Integrations...');
+        const baseUrl = this.testContext.baseUrl;
+        const browserOptions = { headless: true, respectRobots: false, defaultTimeout: 5000 };
+
+        try {
+            const textExtractor = new TextExtractor(new BrowserInterface(browserOptions), {
+                waitForDynamicContent: 200
+            });
+            const textResults = await textExtractor.run(baseUrl);
+            this.recordResult(
+                'TextExtractor summary generated',
+                textResults?.summary?.wordCount > 0,
+                `Word count: ${textResults?.summary?.wordCount}`
+            );
+
+            const imageExtractor = new MFTExtractor(new BrowserInterface(browserOptions), {
+                maxScrolls: 1,
+                scrollDelay: 150,
+                stabilizationDelay: 300
+            });
+            const imageResults = await imageExtractor.run(baseUrl);
+            const heroImage = `${baseUrl}/media/hero.jpg`;
+            this.recordResult(
+                'MFTExtractor hero image detected',
+                imageResults.items.includes(heroImage),
+                `Images found: ${imageResults.items.length}`
+            );
+
+            const videoExtractor = new TBRExtractor(new BrowserInterface(browserOptions), {
+                observationWindow: 500,
+                scanShadowDOM: false
+            });
+            const videoResults = await videoExtractor.run(baseUrl);
+            const hasHls = videoResults.grouped.hls.some(url => url.includes('stream.m3u8'));
+            const hasMp4 = videoResults.grouped.direct.some(url => url.includes('video.mp4'));
+            this.recordResult(
+                'TBRExtractor streaming and direct video detected',
+                hasHls && hasMp4,
+                `HLS: ${videoResults.grouped.hls.length}, Direct: ${videoResults.grouped.direct.length}`
+            );
+
+            const audioExtractor = new AudioExtractor(new BrowserInterface(browserOptions), {
+                observationWindow: 500
+            });
+            const audioResults = await audioExtractor.run(baseUrl);
+            const hasMp3 = audioResults.grouped.mp3.some(url => url.includes('audio.mp3'));
+            this.recordResult(
+                'AudioExtractor mp3 detected',
+                hasMp3,
+                `Audio found: ${audioResults.items.length}`
+            );
+
+            const pdfExtractor = new PDFExtractor(new BrowserInterface(browserOptions));
+            const pdfResults = await pdfExtractor.run(baseUrl);
+            const hasPdf = pdfResults.grouped.pdf.some(url => url.includes('sample.pdf'));
+            this.recordResult(
+                'PDFExtractor pdf detected',
+                hasPdf,
+                `Documents found: ${pdfResults.items.length}`
+            );
+        } catch (error) {
+            this.recordResult('Extractor integration', false, error.message);
+        }
+
+        console.log('');
+    }
+
+    async testDataSynthesizerIntegration() {
+        console.log('🧾 Testing DataSynthesizer Integration...');
+        const logs = this.testContext.crawlerLog || [];
+
+        if (logs.length === 0) {
+            this.recordResult('DataSynthesizer input logs', false, 'No crawl log entries captured');
+            console.log('');
+            return;
+        }
+
+        const synthesizer = new DataSynthesizer(logs);
+        const jsonl = synthesizer.toJSONL();
+        const markdown = synthesizer.toMarkdown();
+        const csv = synthesizer.toCSV();
+        const raw = synthesizer.toRaw();
+
+        this.recordResult(
+            'DataSynthesizer JSONL entries',
+            jsonl.split('\n').length === logs.length,
+            `JSONL lines: ${jsonl.split('\n').length}`
+        );
+        this.recordResult(
+            'DataSynthesizer Markdown report',
+            markdown.includes('# LPS Discovery Report') && markdown.includes('## Summary'),
+            'Markdown report generated'
+        );
+        this.recordResult(
+            'DataSynthesizer CSV output',
+            csv.startsWith('timestamp,phase,interaction,url,text,title'),
+            'CSV header validated'
+        );
+        this.recordResult(
+            'DataSynthesizer raw output',
+            raw.includes('SCROLL') || raw.includes('PAGE_NEXT'),
+            'Raw output contains interactions'
+        );
+
         console.log('');
     }
 
@@ -205,7 +453,7 @@ class ImplementationTester {
         console.log('🖥️  Testing Desktop App Structure...');
         
         try {
-            const desktopAppContent = await fs.readFile(path.join(__dirname, 'desktop', 'REAL_DESKTOP_APP.js'), 'utf8');
+            const desktopAppContent = await fs.readFile(path.join(__dirname, 'desktop', 'main.js'), 'utf8');
             
             const hasElectron = desktopAppContent.includes('electron');
             const hasIPCHandlers = desktopAppContent.includes('ipcMain');
@@ -248,7 +496,7 @@ class ImplementationTester {
         console.log('🎨 Testing GUI Implementation...');
         
         try {
-            const guiContent = await fs.readFile(path.join(__dirname, 'WORKING_GUI.html'), 'utf8');
+            const guiContent = await fs.readFile(path.join(__dirname, 'index.html'), 'utf8');
             
             const hasProductionClasses = guiContent.includes('WebCrawler') || guiContent.includes('ImageExtractor') || guiContent.includes('VideoExtractor');
             const hasErrorHandling = guiContent.includes('try') || guiContent.includes('catch') || guiContent.includes('error');
