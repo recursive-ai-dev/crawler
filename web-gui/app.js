@@ -1,5 +1,37 @@
 // LPS Crawler Web GUI Application
 
+class Spider {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = Math.random() * 2 - 1;
+        this.vy = Math.random() * 2 - 1;
+        this.size = Math.random() * 5 + 2;
+    }
+
+    draw() {
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        this.ctx.beginPath();
+        this.ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > this.canvas.width) {
+            this.vx *= -1;
+        }
+
+        if (this.y < 0 || this.y > this.canvas.height) {
+            this.vy *= -1;
+        }
+    }
+}
+
 class CrawlerApp {
     constructor() {
         this.activeTab = 0;
@@ -12,6 +44,9 @@ class CrawlerApp {
             respectRobots: true
         };
         
+        this.spiders = [];
+        this.animationFrameId = null;
+
         this.initializeApp();
     }
 
@@ -20,6 +55,11 @@ class CrawlerApp {
         this.setupEventListeners();
         this.updateAllSliders();
         this.showNotification('LPS Crawler GUI loaded successfully!', 'success');
+
+        this.canvas = document.getElementById('spider-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.canvas.width = this.canvas.clientWidth;
+        this.canvas.height = this.canvas.clientHeight;
     }
 
     loadSettings() {
@@ -138,6 +178,9 @@ class CrawlerApp {
         document.getElementById('crawl-duration').textContent = '0.0s';
         document.getElementById('crawl-tension').textContent = '0.00';
 
+        this.spiders = Array.from({ length: 100 }, () => new Spider(this.canvas));
+        this.animateSpiders();
+
         try {
             const startTime = Date.now();
             let totalLinks = 0;
@@ -188,7 +231,19 @@ class CrawlerApp {
             this.showNotification('Crawling failed: ' + error.message, 'error');
         } finally {
             this.isRunning = false;
+            cancelAnimationFrame(this.animationFrameId);
         }
+    }
+
+    animateSpiders() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.spiders.forEach(spider => {
+            spider.update();
+            spider.draw();
+        });
+
+        this.animationFrameId = requestAnimationFrame(() => this.animateSpiders());
     }
 
     exportCrawlResults() {
