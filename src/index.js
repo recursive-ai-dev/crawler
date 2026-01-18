@@ -7,7 +7,8 @@ const {
   BaseExtractor,
   TextExtractor,
   AudioExtractor,
-  PDFExtractor
+  PDFExtractor,
+  UniversalExtractor
 } = require('./extractors');
 
 module.exports = {
@@ -22,6 +23,7 @@ module.exports = {
   TextExtractor,     // Text/Content
   AudioExtractor,    // Audio/Podcasts
   PDFExtractor,      // Documents/PDFs
+  UniversalExtractor,// All-in-one extractor
   BaseExtractor,     // Base class for custom extractors
 
   // Factory functions for individual extractors

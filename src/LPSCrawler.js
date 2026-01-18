@@ -206,6 +206,12 @@ class LPSCrawler extends EventEmitter {
       browserStats: this.browser.getStats()
     };
   }
+
+  async cleanup() {
+    if (this.browser && typeof this.browser.close === 'function') {
+      await this.browser.close();
+    }
+  }
 }
 
 module.exports = LPSCrawler;
