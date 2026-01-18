@@ -199,6 +199,8 @@ class LPSCrawler extends EventEmitter {
       duration,
       phases: this.phase,
       linksFound: this.discoverySet.size,
+      totalDiscoveries: this.discoverySet.size,
+      url: this.browser.page ? this.browser.page.url() : '',
       averageTension: this.tensionMap.reduce((a, b) => a + b, 0) / this.tensionMap.length,
       finalWavefrontSize: this.wavefrontSize,
       browserStats: this.browser.getStats()
