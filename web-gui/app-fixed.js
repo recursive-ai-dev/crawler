@@ -94,6 +94,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('crawl-progress').style.width = '0%';
         document.getElementById('crawl-status').textContent = 'Initializing crawler...';
         
+        // Start spider animation
+        if (window.spiderAnimation) {
+            window.spiderAnimation.start();
+        }
+
         // Simulate crawling
         simulateCrawling(url, maxPhases);
     };
@@ -171,6 +176,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('crawl-progress').style.width = '100%';
                 document.getElementById('crawl-status').textContent = 'Crawling completed!';
                 showNotification('Web crawling completed successfully!', 'success');
+
+                // Stop spider animation
+                if (window.spiderAnimation) {
+                    window.spiderAnimation.stop();
+                }
+
                 return;
             }
             
