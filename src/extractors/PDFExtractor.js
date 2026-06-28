@@ -222,7 +222,7 @@ class PDFExtractor extends BaseExtractor {
                             pages: pdfDocument?.numPages
                         });
                     }
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             }
 
             // Check for PDF.js in iframes
@@ -240,7 +240,7 @@ class PDFExtractor extends BaseExtractor {
                             viewerUrl: iframe.src
                         });
                     }
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             });
 
             // canvas-based PDF viewers
