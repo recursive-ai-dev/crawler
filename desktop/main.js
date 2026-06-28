@@ -128,7 +128,6 @@ class LPSCrawlerDesktop {
                 allowRunningInsecureContent: false
             },
             titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-            show: false
         });
 
         // Load the GUI

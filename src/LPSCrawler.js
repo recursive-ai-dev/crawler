@@ -26,7 +26,7 @@ class LPSCrawler extends EventEmitter {
   }
 
   calculateTension(newLinks) {
-    const initialSize = this.discoverySet.size;
+
     let newDiscoveries = 0;
 
     for (const link of newLinks) {

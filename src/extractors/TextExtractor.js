@@ -457,7 +457,7 @@ class TextExtractor extends BaseExtractor {
                         css: /[.#][\w-]+\s*{|@media|@import/,
                         sql: /\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|CREATE)\b/i,
                         bash: /^\s*(#!\/bin\/|sudo|apt|npm|yarn|cd |ls |mkdir)/m,
-                        json: /^\s*[{\[]/,
+                        json: /^\s*[{[]/,
                         xml: /^\s*<\?xml|<[\w-]+[^>]*>/,
                         typescript: /:\s*(string|number|boolean|any)\b|interface\s+\w+/,
                         go: /\b(func|package|import|type|struct)\b/,
@@ -611,17 +611,23 @@ class TextExtractor extends BaseExtractor {
                                 case 'h5': md += `\n\n##### ${toMarkdown(child, true).trim()}\n\n`; break;
                                 case 'h6': md += `\n\n###### ${toMarkdown(child, true).trim()}\n\n`; break;
                                 case 'p':
+                                    {
                                     const pContent = toMarkdown(child, true).trim();
                                     if (pContent) md += `\n\n${pContent}\n\n`;
                                     break;
+                                    }
                                 case 'strong': case 'b':
+                                    {
                                     const strong = toMarkdown(child, true).trim();
                                     if (strong) md += `**${strong}**`;
                                     break;
+                                    }
                                 case 'em': case 'i':
+                                    {
                                     const em = toMarkdown(child, true).trim();
                                     if (em) md += `*${em}*`;
                                     break;
+                                    }
                                 case 'u':
                                     md += `<u>${toMarkdown(child, true).trim()}</u>`;
                                     break;
@@ -629,10 +635,12 @@ class TextExtractor extends BaseExtractor {
                                     md += `~~${toMarkdown(child, true).trim()}~~`;
                                     break;
                                 case 'a':
+                                    {
                                     const linkText = toMarkdown(child, true).trim();
                                     const href = child.href;
                                     if (linkText && href) md += `[${linkText}](${href})`;
                                     break;
+                                    }
                                 case 'ul':
                                     md += '\n';
                                     child.querySelectorAll(':scope > li').forEach(li => {
@@ -648,23 +656,27 @@ class TextExtractor extends BaseExtractor {
                                     md += '\n';
                                     break;
                                 case 'blockquote':
+                                    {
                                     const quote = toMarkdown(child, true).trim();
                                     if (quote) {
                                         md += '\n\n' + quote.split('\n').map(line => `> ${line}`).join('\n') + '\n\n';
                                     }
                                     break;
+                                    }
                                 case 'code':
                                     if (child.parentElement?.tagName !== 'PRE') {
                                         md += `\`${child.textContent?.trim() || ''}\``;
                                     }
                                     break;
                                 case 'pre':
+                                    {
                                     const codeEl = child.querySelector('code');
                                     const code = codeEl?.textContent || child.textContent || '';
                                     const langClass = (codeEl?.className || child.className || '').match(/language-(\w+)/);
                                     const lang = langClass ? langClass[1] : '';
                                     md += `\n\n\`\`\`${lang}\n${code.trim()}\n\`\`\`\n\n`;
                                     break;
+                                    }
                                 case 'br':
                                     md += '\n';
                                     break;
@@ -672,11 +684,14 @@ class TextExtractor extends BaseExtractor {
                                     md += '\n\n---\n\n';
                                     break;
                                 case 'img':
+                                    {
                                     const alt = child.alt || '';
                                     const src = child.src || '';
                                     if (src) md += `\n\n![${alt}](${src})\n\n`;
                                     break;
+                                    }
                                 case 'figure':
+                                    {
                                     const figImg = child.querySelector('img');
                                     const figCap = child.querySelector('figcaption');
                                     if (figImg) {
@@ -685,7 +700,9 @@ class TextExtractor extends BaseExtractor {
                                         md += '\n\n';
                                     }
                                     break;
+                                    }
                                 case 'table':
+                                    {
                                     const headers = [];
                                     const rows = [];
                                     const thead = child.querySelector('thead tr') || child.querySelector('tr');
@@ -711,6 +728,7 @@ class TextExtractor extends BaseExtractor {
                                         md += '\n';
                                     }
                                     break;
+                                    }
                                 case 'div': case 'section': case 'article': case 'main': case 'span':
                                 case 'aside': case 'header': case 'footer': case 'nav':
                                     md += toMarkdown(child, true);

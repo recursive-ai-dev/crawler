@@ -309,7 +309,7 @@ class AudioExtractor extends BaseExtractor {
                             urls.push({ url: howl._src, player: 'howler' });
                         }
                     });
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             }
 
             // Amplitude.js
@@ -319,7 +319,7 @@ class AudioExtractor extends BaseExtractor {
                     songs.forEach(song => {
                         if (song.url) urls.push({ url: song.url, player: 'amplitude' });
                     });
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             }
 
             // Plyr
@@ -329,7 +329,7 @@ class AudioExtractor extends BaseExtractor {
                         const audio = el.querySelector('audio');
                         if (audio?.src) urls.push({ url: audio.src, player: 'plyr' });
                     });
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             }
 
             // MediaElement.js
@@ -340,17 +340,17 @@ class AudioExtractor extends BaseExtractor {
                             urls.push({ url: player.media.src, player: 'mediaelement' });
                         }
                     });
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             }
 
             // JPlayer
             if (window.jPlayer) {
                 try {
                     document.querySelectorAll('.jp-audio').forEach(container => {
-                        const status = $(container).data('jPlayer')?.status;
+                        const status = window.$(container).data('jPlayer')?.status;
                         if (status?.src) urls.push({ url: status.src, player: 'jplayer' });
                     });
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             }
 
             // Generic check for common audio player variables
@@ -362,7 +362,7 @@ class AudioExtractor extends BaseExtractor {
                         if (p.currentSrc) urls.push({ url: p.currentSrc, player: varName });
                         if (p._src) urls.push({ url: p._src, player: varName });
                     }
-                } catch (e) { }
+                } catch (e) { console.error(e) }
             });
 
             return urls;

@@ -363,7 +363,7 @@ class TBRExtractor extends BaseExtractor {
               });
             }
           });
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       }
 
       // HLS.js
@@ -391,7 +391,7 @@ class TBRExtractor extends BaseExtractor {
                 urls.push({ url: track.url, player: 'hlsjs', type: 'audio-track', name: track.name });
               });
             }
-          } catch (e) { }
+          } catch (e) { console.error(e) }
         });
       }
 
@@ -403,7 +403,7 @@ class TBRExtractor extends BaseExtractor {
             const source = player.getSource?.();
             if (source) urls.push({ url: source, player: 'dashjs', type: 'dash' });
           });
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       }
 
       // Shaka Player
@@ -424,7 +424,7 @@ class TBRExtractor extends BaseExtractor {
                 });
               });
             }
-          } catch (e) { }
+          } catch (e) { console.error(e) }
         });
       }
 
@@ -432,7 +432,7 @@ class TBRExtractor extends BaseExtractor {
       if (window.jwplayer) {
         try {
           const instances = window.jwplayer.api?.instances ||
-            (typeof jwplayer === 'function' ? [jwplayer()] : []);
+            (typeof jwplayer === 'function' ? [window.jwplayer()] : []);
           instances.forEach(instance => {
             try {
               const playlist = instance.getPlaylist?.();
@@ -469,9 +469,9 @@ class TBRExtractor extends BaseExtractor {
                   urls.push({ player: 'jwplayer', quality: { label: level.label, bitrate: level.bitrate } });
                 }
               });
-            } catch (e) { }
+            } catch (e) { console.error(e) }
           });
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       }
 
       // Plyr
@@ -485,7 +485,7 @@ class TBRExtractor extends BaseExtractor {
                 if (s.src) urls.push({ url: s.src, player: 'plyr', size: s.size });
               });
             }
-          } catch (e) { }
+          } catch (e) { console.error(e) }
         });
       }
 
@@ -497,7 +497,7 @@ class TBRExtractor extends BaseExtractor {
             const src = fp.video?.src;
             if (src) urls.push({ url: src, player: 'flowplayer' });
           });
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       }
 
       // Brightcove
@@ -510,7 +510,7 @@ class TBRExtractor extends BaseExtractor {
               videoId: el.dataset?.videoId,
               accountId: el.dataset?.account
             });
-          } catch (e) { }
+          } catch (e) { console.error(e) }
         });
       }
 
@@ -523,7 +523,7 @@ class TBRExtractor extends BaseExtractor {
             if (p.currentSrc) urls.push({ url: p.currentSrc, player: varName });
             if (p.source) urls.push({ url: p.source, player: varName });
           }
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       });
 
       return urls;
@@ -574,7 +574,7 @@ class TBRExtractor extends BaseExtractor {
               });
             }
           });
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       }
 
       // Vimeo embeds
@@ -598,7 +598,7 @@ class TBRExtractor extends BaseExtractor {
             if (videoId) {
               found.push({ platform: 'vimeo', videoId: String(videoId) });
             }
-          } catch (e) { }
+          } catch (e) { console.error(e) }
         });
       }
 
@@ -627,7 +627,7 @@ class TBRExtractor extends BaseExtractor {
               });
             }
           });
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       }
 
       // Dailymotion

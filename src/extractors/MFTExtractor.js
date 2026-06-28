@@ -289,7 +289,7 @@ class MFTExtractor extends BaseExtractor {
             }
           };
           extractImages(data);
-        } catch (e) { }
+        } catch (e) { console.error(e) }
       });
 
       return images;
